@@ -57,6 +57,8 @@ class TailscaleManager(QObject):
                 self.start_listener()
                 print("✅ Host listener started - waiting for peer to connect")
                 print("⏳ Host is now listening on port 8080...")
+                # Wait for connection to be established
+                self.wait_for_connection()
                 return
             elif role == 'client':
                 # Act as client - connect to host
@@ -77,11 +79,29 @@ class TailscaleManager(QObject):
                 except Exception as connect_error:
                     print(f"❌ Auto connection failed: {connect_error}")
                     print("👂 Waiting for peer to connect to us...")
+                    self.wait_for_connection()
                     return
                 
         except Exception as e:
             print(f"❌ Connection failed: {e}")
             raise Exception(f"Connection failed: {str(e)}")
+            
+    def wait_for_connection(self):
+        """Wait for connection to be established (for host mode)."""
+        print("⏳ Waiting for peer connection...")
+        max_wait = 30  # Wait up to 30 seconds
+        wait_time = 0
+        while not self.connected and wait_time < max_wait:
+            time.sleep(0.5)
+            wait_time += 0.5
+            print(f"⏳ Still waiting... ({wait_time:.1f}s) - connected: {self.connected}, socket: {self.peer_socket is not None}")
+            
+        if self.connected:
+            print("✅ Connection established!")
+            print(f"🔍 Final connection state - connected: {self.connected}, socket: {self.peer_socket is not None}")
+        else:
+            print("❌ Connection timeout - no peer connected")
+            raise Exception("Connection timeout - no peer connected within 30 seconds")
             
     def disconnect(self):
         """Disconnect from peer."""
@@ -286,6 +306,15 @@ class TailscaleManager(QObject):
         """Send a chat message to the peer."""
         print(f"🔤 Sending chat message: {message}")
         print(f"🔍 Connection status - connected: {self.connected}, socket: {self.peer_socket is not None}")
+        
+        # Force check connection status
+        if self.peer_socket and self.peer_socket.fileno() != -1:
+            print("✅ Socket is valid and connected")
+            self.connected = True
+        else:
+            print("❌ Socket is invalid or disconnected")
+            self.connected = False
+            
         if self.connected and self.peer_socket:
             data = {
                 'type': 'chat',
