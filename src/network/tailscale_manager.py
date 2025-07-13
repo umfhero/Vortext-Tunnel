@@ -33,6 +33,7 @@ class TailscaleManager(QObject):
     def connect(self, profile):
         """Connect to peer using Tailscale."""
         try:
+            import time  # Move import to top of function
             print(f"🔗 Starting connection process for profile: {profile}")
             
             # Check if Tailscale is running
@@ -61,7 +62,6 @@ class TailscaleManager(QObject):
                 # Act as client - connect to host
                 print("🔌 Acting as CLIENT - connecting to host...")
                 # Wait a moment for host to start listening
-                import time
                 print("⏳ Waiting 2 seconds for host to start listening...")
                 time.sleep(2)
                 self.connect_to_peer()
