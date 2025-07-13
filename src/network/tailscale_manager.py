@@ -50,18 +50,20 @@ class TailscaleManager(QObject):
             role = config.get_connection_role()
             print(f"🎭 Connection role: {role}")
             
-            if role == 'host' or (role == 'auto' and profile == 'My Profile'):
+            if role == 'host':
                 # Act as host - listen for connections
                 print("🎧 Acting as HOST - listening for connections...")
                 self.start_listener()
                 print("✅ Host listener started - waiting for peer to connect")
+                print("⏳ Host is now listening on port 8080...")
                 return
-            elif role == 'client' or (role == 'auto' and profile == "Friend's Profile"):
+            elif role == 'client':
                 # Act as client - connect to host
                 print("🔌 Acting as CLIENT - connecting to host...")
                 # Wait a moment for host to start listening
                 import time
-                time.sleep(1)
+                print("⏳ Waiting 2 seconds for host to start listening...")
+                time.sleep(2)
                 self.connect_to_peer()
                 print("✅ Client connection successful")
             else:
@@ -145,17 +147,25 @@ class TailscaleManager(QObject):
     def start_listener(self):
         """Start listening for incoming connections."""
         try:
+            print(f"🔧 Creating socket for port {self.local_port}...")
             self.listener_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.listener_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            
+            print(f"🔧 Binding socket to 0.0.0.0:{self.local_port}...")
             self.listener_socket.bind(('0.0.0.0', self.local_port))
+            
+            print(f"🔧 Starting to listen on port {self.local_port}...")
             self.listener_socket.listen(1)
+            print(f"✅ Successfully listening on port {self.local_port}")
             
             # Start listener thread
             self.listener_thread = threading.Thread(target=self.listen_for_connections)
             self.listener_thread.daemon = True
             self.listener_thread.start()
+            print("✅ Listener thread started")
             
         except Exception as e:
+            print(f"❌ Failed to start listener: {e}")
             raise Exception(f"Failed to start listener: {str(e)}")
             
     def listen_for_connections(self):
