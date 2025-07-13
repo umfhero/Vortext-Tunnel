@@ -210,10 +210,12 @@ class TailscaleManager(QObject):
             
     def handle_peer_connection(self):
         """Handle incoming peer connection."""
+        print("🤝 Handling incoming peer connection...")
         # Start receiving thread
         receive_thread = threading.Thread(target=self.receive_data)
         receive_thread.daemon = True
         receive_thread.start()
+        print("✅ Receive thread started for incoming connection")
         
     def receive_data(self):
         """Receive data from peer."""
@@ -255,6 +257,7 @@ class TailscaleManager(QObject):
     def process_received_data(self, data):
         """Process received data and emit appropriate signals."""
         try:
+            print(f"🔍 Processing received data: {data[:100]}...")  # Show first 100 chars
             message = json.loads(data.decode('utf-8'))
             message_type = message.get('type')
             content = message.get('content', '')
@@ -272,9 +275,12 @@ class TailscaleManager(QObject):
                 file_data = message.get('data', b'')
                 print(f"📁 Emitting file: {file_name}")
                 self.file_received.emit(file_name, file_data)
+            else:
+                print(f"❓ Unknown message type: {message_type}")
                 
         except Exception as e:
             print(f"❌ Error processing received data: {e}")
+            print(f"❌ Raw data: {data}")
             
     def send_message(self, message):
         """Send a chat message to the peer."""

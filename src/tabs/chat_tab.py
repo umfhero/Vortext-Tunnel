@@ -109,7 +109,9 @@ class ChatTab(QWidget):
     def receive_message(self, message):
         """Receive a message from the peer."""
         print(f"💬 Chat tab received message: {message}")
+        print(f"💬 Adding message to chat display: {message}")
         self.add_message("Peer", message, is_local=False)
+        print(f"💬 Message added to chat display")
         
     def clear_chat(self):
         """Clear the chat display."""
