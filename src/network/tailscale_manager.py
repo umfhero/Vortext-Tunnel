@@ -69,16 +69,16 @@ class TailscaleManager(QObject):
                 self.connect_to_peer()
                 print("✅ Client connection successful")
             else:
-                # Auto mode - try both approaches
-                print("🔄 Auto mode - trying both host and client...")
-                self.start_listener()
-                time.sleep(0.5)
+                # Auto mode - try client first, then host
+                print("🔄 Auto mode - trying client first...")
                 try:
+                    time.sleep(1)  # Wait a moment for other side to start listening
                     self.connect_to_peer()
-                    print("✅ Auto connection successful")
+                    print("✅ Auto mode: Successfully connected as client")
                 except Exception as connect_error:
-                    print(f"❌ Auto connection failed: {connect_error}")
-                    print("👂 Waiting for peer to connect to us...")
+                    print(f"❌ Auto mode: Client connection failed, switching to host mode: {connect_error}")
+                    self.start_listener()
+                    print("✅ Auto mode: Now listening as host")
                     self.wait_for_connection()
                     return
                 
@@ -226,6 +226,8 @@ class TailscaleManager(QObject):
             
         except Exception as e:
             print(f"❌ Connection failed: {e}")
+            self.peer_socket = None
+            self.connected = False
             raise Exception(f"Failed to connect to peer: {str(e)}")
             
     def handle_peer_connection(self):
@@ -272,7 +274,8 @@ class TailscaleManager(QObject):
                 break
                 
         print("📥 Receive data loop ended")
-        self.disconnect()
+        if self.connected:  # Only disconnect if we're still connected
+            self.disconnect()
         
     def process_received_data(self, data):
         """Process received data and emit appropriate signals."""

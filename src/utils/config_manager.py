@@ -42,7 +42,7 @@ class ConfigManager:
             },
             'tailscale_peer_addresses': {
                 'My Profile': '100.93.161.73',
-                'Friend\'s Profile': '100.69.157.127'
+                'Friend\'s Profile': '100.122.120.65'
             }
         }
         
