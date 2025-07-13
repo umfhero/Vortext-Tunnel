@@ -81,6 +81,12 @@ class MainWindow(QMainWindow):
         self.profile_combo.addItems(["My Profile", "Friend's Profile"])
         self.profile_combo.currentTextChanged.connect(self.on_profile_changed)
         
+        # Connection role selection
+        role_label = QLabel("Role:")
+        self.role_combo = QComboBox()
+        self.role_combo.addItems(["Auto", "Host", "Client"])
+        self.role_combo.currentTextChanged.connect(self.on_role_changed)
+        
         # Connection button
         self.connect_btn = QPushButton("Connect")
         self.connect_btn.clicked.connect(self.toggle_connection)
@@ -97,6 +103,8 @@ class MainWindow(QMainWindow):
         # Add widgets to toolbar
         toolbar_layout.addWidget(profile_label)
         toolbar_layout.addWidget(self.profile_combo)
+        toolbar_layout.addWidget(role_label)
+        toolbar_layout.addWidget(self.role_combo)
         toolbar_layout.addStretch()
         toolbar_layout.addWidget(self.connect_btn)
         toolbar_layout.addWidget(self.theme_btn)
@@ -180,12 +188,25 @@ class MainWindow(QMainWindow):
             if always_on_top else self.windowFlags() & ~Qt.WindowType.WindowStaysOnTopHint
         )
         
+        # Apply profile and role settings
+        profile = settings.get('profile', 'My Profile')
+        role = settings.get('connection_role', 'auto')
+        
+        profile_index = self.profile_combo.findText(profile)
+        if profile_index >= 0:
+            self.profile_combo.setCurrentIndex(profile_index)
+            
+        role_index = self.role_combo.findText(role.title())
+        if role_index >= 0:
+            self.role_combo.setCurrentIndex(role_index)
+            
     def save_settings(self):
         """Save application settings."""
         settings = {
             'dark_mode': self.theme_manager.is_dark_mode(),
             'always_on_top': self.always_top_checkbox.isChecked(),
-            'profile': self.profile_combo.currentText()
+            'profile': self.profile_combo.currentText(),
+            'connection_role': self.role_combo.currentText().lower()
         }
         self.config_manager.save_settings(settings)
         
@@ -241,6 +262,10 @@ class MainWindow(QMainWindow):
     def on_profile_changed(self, profile):
         """Handle profile selection change."""
         self.statusBar().showMessage(f"Profile changed to: {profile}")
+        
+    def on_role_changed(self, role):
+        """Handle role selection change."""
+        self.statusBar().showMessage(f"Role changed to: {role}")
         
     def on_connection_status_changed(self, connected):
         """Handle connection status changes."""

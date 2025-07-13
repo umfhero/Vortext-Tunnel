@@ -33,6 +33,7 @@ class ConfigManager:
             'dark_mode': False,
             'always_on_top': False,
             'profile': 'My Profile',
+            'connection_role': 'auto',  # 'host', 'client', or 'auto'
             'window_geometry': {
                 'x': 100,
                 'y': 100,
@@ -40,8 +41,8 @@ class ConfigManager:
                 'height': 700
             },
             'tailscale_peer_addresses': {
-                'My Profile': '100.64.0.2',
-                'Friend\'s Profile': '100.64.0.1'
+                'My Profile': '100.93.161.73',
+                'Friend\'s Profile': '100.69.157.127'
             }
         }
         
@@ -114,6 +115,15 @@ class ConfigManager:
         addresses[profile] = address
         settings['tailscale_peer_addresses'] = addresses
         self.save_settings(settings)
+        
+    def get_connection_role(self):
+        """Get the connection role setting."""
+        settings = self.load_settings()
+        return settings.get('connection_role', 'auto')
+        
+    def set_connection_role(self, role):
+        """Set the connection role."""
+        self.set_setting('connection_role', role)
         
     def reset_settings(self):
         """Reset all settings to defaults."""

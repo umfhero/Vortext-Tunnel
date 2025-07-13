@@ -44,24 +44,38 @@ class TailscaleManager(QObject):
             self.peer_address = self.get_peer_address(profile)
             print(f"📍 Peer address: {self.peer_address}")
             
-            # Start listening for incoming connections first
-            self.start_listener()
-            print("✅ Listener started")
+            # Get connection role from config
+            from utils.config_manager import ConfigManager
+            config = ConfigManager()
+            role = config.get_connection_role()
+            print(f"🎭 Connection role: {role}")
             
-            # Wait a moment for listener to start
-            import time
-            time.sleep(0.5)
-            
-            # Try to connect to peer
-            try:
-                self.connect_to_peer()
-                print("✅ Successfully connected to peer")
-            except Exception as connect_error:
-                print(f"❌ Connection attempt failed: {connect_error}")
-                print("👂 Waiting for peer to connect to us...")
-                # If connection fails, wait for peer to connect to us
-                # The listener thread will handle incoming connections
+            if role == 'host' or (role == 'auto' and profile == 'My Profile'):
+                # Act as host - listen for connections
+                print("🎧 Acting as HOST - listening for connections...")
+                self.start_listener()
+                print("✅ Host listener started - waiting for peer to connect")
                 return
+            elif role == 'client' or (role == 'auto' and profile == "Friend's Profile"):
+                # Act as client - connect to host
+                print("🔌 Acting as CLIENT - connecting to host...")
+                # Wait a moment for host to start listening
+                import time
+                time.sleep(1)
+                self.connect_to_peer()
+                print("✅ Client connection successful")
+            else:
+                # Auto mode - try both approaches
+                print("🔄 Auto mode - trying both host and client...")
+                self.start_listener()
+                time.sleep(0.5)
+                try:
+                    self.connect_to_peer()
+                    print("✅ Auto connection successful")
+                except Exception as connect_error:
+                    print(f"❌ Auto connection failed: {connect_error}")
+                    print("👂 Waiting for peer to connect to us...")
+                    return
                 
         except Exception as e:
             print(f"❌ Connection failed: {e}")

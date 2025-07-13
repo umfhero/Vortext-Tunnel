@@ -45,3 +45,6 @@ except Exception as e:
     print(f"❌ Import error: {e}")
     import traceback
     traceback.print_exc() 
+
+# Run the build with debug output and show the logs
+os.system("python -m PyInstaller --onefile --windowed --name=VortexTunnel --add-data=src;src --hidden-import=PyQt6 --hidden-import=PyQt6.QtCore --hidden-import=PyQt6.QtWidgets --hidden-import=PyQt6.QtGui --collect-all=PyQt6 main.py --log-level=DEBUG")
