@@ -1,12 +1,19 @@
 # -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import collect_all
+
+datas = [('src', 'src')]
+binaries = []
+hiddenimports = ['PyQt6', 'PyQt6.QtCore', 'PyQt6.QtWidgets', 'PyQt6.QtGui', 'src', 'src.tabs', 'src.tabs.drawing_tab', 'src.tabs.chat_tab', 'src.tabs.file_tab', 'src.tabs.canvas_widget', 'src.network', 'src.network.tailscale_manager', 'src.utils', 'src.utils.theme_manager', 'src.utils.config_manager']
+tmp_ret = collect_all('PyQt6')
+datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 
 
 a = Analysis(
     ['main.py'],
     pathex=[],
-    binaries=[],
-    datas=[('src', 'src')],
-    hiddenimports=[],
+    binaries=binaries,
+    datas=datas,
+    hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

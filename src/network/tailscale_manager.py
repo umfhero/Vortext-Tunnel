@@ -28,7 +28,7 @@ class TailscaleManager(QObject):
         self.listener_socket = None
         self.listener_thread = None
         self.peer_address = None
-        self.local_port = 8080
+        self.local_port = 8081
         
     def connect(self, profile):
         """Connect to peer using Tailscale."""
@@ -56,7 +56,7 @@ class TailscaleManager(QObject):
                 print("🎧 Acting as HOST - listening for connections...")
                 self.start_listener()
                 print("✅ Host listener started - waiting for peer to connect")
-                print("⏳ Host is now listening on port 8080...")
+                print(f"⏳ Host is now listening on port {self.local_port}...")
                 # Wait for connection to be established
                 self.wait_for_connection()
                 return
