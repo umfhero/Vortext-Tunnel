@@ -217,30 +217,39 @@ class TailscaleManager(QObject):
         
     def receive_data(self):
         """Receive data from peer."""
+        print("📥 Starting receive data loop...")
         while self.connected and self.peer_socket:
             try:
+                print("📥 Waiting for data length...")
                 # Receive data length first
                 length_data = self.peer_socket.recv(8)
                 if not length_data:
+                    print("❌ No length data received, connection closed")
                     break
                     
                 data_length = int.from_bytes(length_data, 'big')
+                print(f"📥 Received data length: {data_length} bytes")
                 
                 # Receive actual data
                 data = b''
                 while len(data) < data_length:
                     chunk = self.peer_socket.recv(data_length - len(data))
                     if not chunk:
+                        print("❌ Connection closed while receiving data")
                         break
                     data += chunk
                     
                 if data:
+                    print(f"📥 Received {len(data)} bytes of data")
                     self.process_received_data(data)
+                else:
+                    print("❌ No data received")
                     
             except Exception as e:
-                print(f"Error receiving data: {e}")
+                print(f"❌ Error receiving data: {e}")
                 break
                 
+        print("📥 Receive data loop ended")
         self.disconnect()
         
     def process_received_data(self, data):
@@ -270,11 +279,13 @@ class TailscaleManager(QObject):
     def send_message(self, message):
         """Send a chat message to the peer."""
         print(f"🔤 Sending chat message: {message}")
+        print(f"🔍 Connection status - connected: {self.connected}, socket: {self.peer_socket is not None}")
         if self.connected and self.peer_socket:
             data = {
                 'type': 'chat',
                 'content': message
             }
+            print(f"📤 Sending data: {data}")
             self.send_data(data)
             print(f"✅ Chat message sent successfully")
         else:
@@ -282,15 +293,20 @@ class TailscaleManager(QObject):
             
     def send_drawing_data(self, drawing_data):
         """Send drawing data to the peer."""
+        print(f"🎨 Sending drawing data: {len(drawing_data)} points")
         if self.connected and self.peer_socket:
             data = {
                 'type': 'drawing',
                 'data': drawing_data
             }
             self.send_data(data)
+            print(f"✅ Drawing data sent successfully")
+        else:
+            print(f"❌ Cannot send drawing - connected: {self.connected}, socket: {self.peer_socket is not None}")
             
     def send_file(self, file_path, file_name):
         """Send a file to the peer."""
+        print(f"📁 Sending file: {file_name}")
         if self.connected and self.peer_socket and os.path.exists(file_path):
             try:
                 with open(file_path, 'rb') as f:
@@ -302,15 +318,20 @@ class TailscaleManager(QObject):
                     'data': file_data
                 }
                 self.send_data(data)
+                print(f"✅ File sent successfully")
                 
             except Exception as e:
                 print(f"Error sending file: {e}")
-                
+        else:
+            print(f"❌ Cannot send file - connected: {self.connected}, socket: {self.peer_socket is not None}")
+            
     def send_data(self, data):
         """Send data to the peer."""
         try:
             json_data = json.dumps(data).encode('utf-8')
             data_length = len(json_data)
+            
+            print(f"📦 Sending {data_length} bytes of data")
             
             # Send length first
             self.peer_socket.send(data_length.to_bytes(8, 'big'))
@@ -318,6 +339,8 @@ class TailscaleManager(QObject):
             # Send data
             self.peer_socket.send(json_data)
             
+            print(f"✅ Data sent successfully")
+            
         except Exception as e:
-            print(f"Error sending data: {e}")
+            print(f"❌ Error sending data: {e}")
             self.disconnect() 
