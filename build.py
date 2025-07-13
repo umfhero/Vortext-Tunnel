@@ -35,6 +35,17 @@ def build_executable():
         "--hidden-import=PyQt6.QtCore",
         "--hidden-import=PyQt6.QtWidgets",
         "--hidden-import=PyQt6.QtGui",
+        "--hidden-import=src",
+        "--hidden-import=src.tabs",
+        "--hidden-import=src.tabs.drawing_tab",
+        "--hidden-import=src.tabs.chat_tab",
+        "--hidden-import=src.tabs.file_tab",
+        "--hidden-import=src.tabs.canvas_widget",
+        "--hidden-import=src.network",
+        "--hidden-import=src.network.tailscale_manager",
+        "--hidden-import=src.utils",
+        "--hidden-import=src.utils.theme_manager",
+        "--hidden-import=src.utils.config_manager",
         "--collect-all=PyQt6",
         "main.py"
     ]

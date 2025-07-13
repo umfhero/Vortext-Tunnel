@@ -6,6 +6,20 @@ Connects two PCs over the internet using Tailscale for peer-to-peer communicatio
 
 import sys
 import os
+from pathlib import Path
+
+# Add src to path for imports (works for both development and executable)
+if getattr(sys, 'frozen', False):
+    # Running as executable
+    base_path = Path(sys._MEIPASS)
+    src_path = base_path / "src"
+else:
+    # Running in development
+    base_path = Path(__file__).parent
+    src_path = base_path / "src"
+
+sys.path.insert(0, str(src_path))
+
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import Qt
 from src.main_window import MainWindow
